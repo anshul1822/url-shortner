@@ -1,118 +1,125 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import { useState } from "react";
+import Image from "next/image";
+import clipboard from 'clipboard';
+import logo from "../assets/logo-removebg-preview.png";
+import url from "../assets/short-url-logo-removebg-preview.png";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const inter = Inter({ subsets: ['latin'] })
+export default function Home({ textToCopy }) {
+  const [originalUrl, setOriginalUrl] = useState("");
+  const [shortUrl, setShortUrl] = useState("");
 
-export default function Home() {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const response = await fetch("/api/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ originalUrl }),
+    });
+
+    const data = await response.json();
+    setShortUrl(data.shortUrl);
+  };
+
+  function getValidURL(url) {
+    if (url.includes("http://") || url.includes("https://")) return url;
+
+    return "http://" + url;
+  }
+
+  const handleCopyToClipboard = async() => {
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      toast.success('Successfully Copied!');
+      // alert('Copied to clipboard!');
+    } catch (err) {
+      toast.error('Toast generated using react-toastify!');
+      // console.error('Failed to copy:', err);
+    }
+  };
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="bg-gradient-to-bl from-orange-200 to-slate-200">
+      <div className="min-h-screen flex flex-col justify-between items-center">
+        <div className="flex justify-center items-center">
+          <Image className="h-32 w-60" src={logo} alt={"alt"} />
+        </div>
+        <form className="lg:w-1/3 flex flex-col gap-4" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Enter URL"
+            className="p-2 mr-2 border border-gray-300 text-black"
+            value={originalUrl}
+            onChange={(e) => setOriginalUrl(e.target.value)}
+            required
+          />
+          <button
+            type="submit"
+            className="p-2 rounded-full text-white text-xl font-bold bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500"
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            Shorten
+          </button>
+          {shortUrl && (
+
+            <div className="flex flex-col gap-1 justify-center items-center">
+              <div className="py-4 px-2 w-full flex flex-wrap justify-evenly bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                <label className="flex gap-1">
+                  <Image className="h-6 w-6" src={url} alt={"alt"} />
+                  Short URL :{" "}
+                </label>
+                <a
+                  href={getValidURL(shortUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  
+                >
+                  <span className="text-sm lg:text-lg underline underline-offset-1 text-blue-500">{getValidURL(shortUrl)}</span>
+                </a>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCopyToClipboard}
+                className="flex justify-evenly items-center gap-4 text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-xs p-3 m-1 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
+              >
+                {" "}
+                <svg
+                  className="w-5 h-5 text-white"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 18 20"
+                >
+                  <path d="M5 9V4.13a2.96 2.96 0 0 0-1.293.749L.879 7.707A2.96 2.96 0 0 0 .13 9H5Zm11.066-9H9.829a2.98 2.98 0 0 0-2.122.879L7 1.584A.987.987 0 0 0 6.766 2h4.3A3.972 3.972 0 0 1 15 6v10h1.066A1.97 1.97 0 0 0 18 14V2a1.97 1.97 0 0 0-1.934-2Z" />
+                  <path d="M11.066 4H7v5a2 2 0 0 1-2 2H0v7a1.969 1.969 0 0 0 1.933 2h9.133A1.97 1.97 0 0 0 13 18V6a1.97 1.97 0 0 0-1.934-2Z" />
+                </svg>
+                <div>Copy To Clipboard</div>
+              </button>
+            </div>
+          )}
+        </form>
+
+        <div class="border-t-2 border-black w-full p-4 flex justify-center items-center">
+          Made with ❤ by Anshul Sinha
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+      {/* <div class="prompt" onClick={copyToClipboard}>Your prompt text goes here</div>       */}
+      <ToastContainer />
+    </div>
+  );
 }
+
+// Developed a highly impactful and functional URL shortener using Next.js and Supabase, showcasing proficiency in React, JavaScript, and backend database management.
+// Implemented API routes to efficiently handle URL creation and redirection, demonstrating strong problem-solving and software development skills.
+// Utilized Tailwind CSS to create a sleek and responsive user interface, ensuring an excellent user experience and leaving a positive impression on recruiters and HR teams.
+// Successfully deployed the application on Vercel, showcasing the ability to take a project from development to production and making it accessible to users worldwide.
+
+// Developed a highly impactful URL shortener using Next.js and Supabase, showcasing strong software development skills and proficiency in React, JavaScript, and backend database management.
+// Created a user-friendly frontend interface with Next.js and Tailwind CSS, ensuring a crisp and responsive user experience.
+// Implemented API routes to efficiently handle URL creation and redirection, utilizing Supabase for seamless data storage and retrieval.
+// Demonstrated in-depth knowledge of database management and SQL by setting up the urls table and handling backend functionality.
+// Successfully deployed the application on Vercel, showcasing the ability to take a project from development to production and making it accessible to users worldwide.
