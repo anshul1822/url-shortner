@@ -1,3 +1,8 @@
+## Project Preview
+
+![Screenshot (42)](https://github.com/anshul1822/url-shortner/assets/68806086/f151dfc2-2556-484c-a551-815df87b9b2f)
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
