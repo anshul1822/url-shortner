@@ -5,14 +5,17 @@ import logo from "../assets/logo-removebg-preview.png";
 import url from "../assets/short-url-logo-removebg-preview.png";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import HashLoader from "react-spinners/HashLoader";
 
 export default function Home({ textToCopy }) {
   const [originalUrl, setOriginalUrl] = useState("");
   const [shortUrl, setShortUrl] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setLoading(true);
     const response = await fetch("/api/create", {
       method: "POST",
       headers: {
@@ -23,6 +26,7 @@ export default function Home({ textToCopy }) {
 
     const data = await response.json();
     setShortUrl(data.shortUrl);
+    setLoading(false);
   };
 
   function getValidURL(url) {
@@ -57,12 +61,30 @@ export default function Home({ textToCopy }) {
             onChange={(e) => setOriginalUrl(e.target.value)}
             required
           />
-          <button
+          {
+            !loading &&
+
+            <button
             type="submit"
             className="p-2 rounded-full text-white text-xl font-bold bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500"
           >
             Shorten
           </button>
+
+          }
+          {
+            loading && 
+
+            <HashLoader
+            color="#000000"
+            loading={loading}
+            className = "mx-auto"
+            size={70}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          />
+
+          }
           {shortUrl && (
 
             <div className="flex flex-col gap-1 justify-center items-center">
@@ -103,7 +125,7 @@ export default function Home({ textToCopy }) {
           )}
         </form>
 
-        <div class="border-t-2 border-black w-full p-4 flex justify-center items-center">
+        <div className="border-t-2 border-black w-full p-4 flex justify-center items-center">
           Made with ❤ by Anshul Sinha
         </div>
       </div>
